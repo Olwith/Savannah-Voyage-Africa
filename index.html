@@ -9,7 +9,6 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://unpkg.com">
 
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -128,14 +127,6 @@ header {
 .nav-phone { font-family: var(--font-heading); font-weight: 700; font-size: 0.85rem; color: var(--color-brown); display: flex; align-items: center; gap: 5px; }
 [data-theme="dark"] .nav-phone { color: var(--color-gold); }
 .nav-phone i { color: var(--color-green); }
-
-.currency-toggle {
-    display: flex; gap: 2px; background: var(--color-sand);
-    padding: 3px; border-radius: 50px; font-family: var(--font-heading);
-    font-weight: 700; font-size: 0.7rem;
-}
-.currency-toggle button { padding: 6px 10px; border-radius: 50px; color: var(--color-text-light); transition: all 0.2s ease; text-transform: uppercase; }
-.currency-toggle button.active { background: var(--color-brown); color: var(--color-white); }
 
 .theme-toggle {
     width: 40px; height: 40px; border-radius: 50%; background: var(--color-sand);
@@ -583,12 +574,6 @@ footer { background-color: #2C1A12; color: #D1C4B8; padding: 60px 0 20px; }
             <li><a href="#contact">Contact</a></li>
         </ul>
         <div class="nav-cta">
-            <div class="currency-toggle" id="currencyToggle">
-                <button class="active" data-currency="KES">KES</button>
-                <button data-currency="USD">USD</button>
-                <button data-currency="EUR">EUR</button>
-                <button data-currency="GBP">GBP</button>
-            </div>
             <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
                 <i class="fas fa-moon"></i>
             </button>
@@ -721,7 +706,7 @@ footer { background-color: #2C1A12; color: #D1C4B8; padding: 60px 0 20px; }
                 <div class="package-image">
                     <img src="https://images.unsplash.com/photo-1549366021-9f761d450615?q=80&w=800&auto=format&fit=crop" alt="Tsavo East Safari">
                     <span class="package-tag">2 Days Safari</span>
-                    <div class="package-price-tag"><span>From</span><strong data-price-kes="18500">KES 18,500</strong></div>
+                    <div class="package-price-tag"><span>From</span><strong>KES 18,500</strong></div>
                 </div>
                 <div class="package-body">
                     <h3>Tsavo East Safari</h3>
@@ -743,7 +728,7 @@ footer { background-color: #2C1A12; color: #D1C4B8; padding: 60px 0 20px; }
                 <div class="package-image">
                     <img src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?q=80&w=800&auto=format&fit=crop" alt="Wasini Dolphin Tour">
                     <span class="package-tag">Day Tour</span>
-                    <div class="package-price-tag"><span>From</span><strong data-price-kes="6500">KES 6,500</strong></div>
+                    <div class="package-price-tag"><span>From</span><strong>KES 6,500</strong></div>
                 </div>
                 <div class="package-body">
                     <h3>Wasini Dolphin Tour</h3>
@@ -765,7 +750,7 @@ footer { background-color: #2C1A12; color: #D1C4B8; padding: 60px 0 20px; }
                 <div class="package-image">
                     <img src="https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=800&auto=format&fit=crop" alt="Amboseli Safari">
                     <span class="package-tag">3 Days Safari</span>
-                    <div class="package-price-tag"><span>From</span><strong data-price-kes="28000">KES 28,000</strong></div>
+                    <div class="package-price-tag"><span>From</span><strong>KES 28,000</strong></div>
                 </div>
                 <div class="package-body">
                     <h3>Amboseli Safari</h3>
@@ -1093,8 +1078,7 @@ footer { background-color: #2C1A12; color: #D1C4B8; padding: 60px 0 20px; }
    CONFIGURATION
    ============================================ */
 const CONFIG = {
-    WHATSAPP_NUMBER: '254798473145',
-    EXCHANGE_API: 'https://api.exchangerate.host/latest?base=KES'
+    WHATSAPP_NUMBER: '254798473145'
 };
 
 /* ============================================
@@ -1122,55 +1106,6 @@ const hamburger = document.getElementById('hamburger');
 const navLinks = document.getElementById('navLinks');
 hamburger.addEventListener('click', () => navLinks.classList.toggle('active'));
 document.querySelectorAll('.nav-links a').forEach(link => link.addEventListener('click', () => navLinks.classList.remove('active')));
-
-/* ============================================
-   CURRENCY CONVERTER
-   ============================================ */
-let exchangeRates = { KES: 1, USD: 0.0077, EUR: 0.0071, GBP: 0.0061 };
-const CACHE_KEY = 'sva-rates';
-const CACHE_TIME = 24 * 60 * 60 * 1000;
-
-async function loadExchangeRates() {
-    try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-            const { timestamp, rates } = JSON.parse(cached);
-            if (Date.now() - timestamp < CACHE_TIME) {
-                exchangeRates = { KES: 1, ...rates };
-                return;
-            }
-        }
-        const res = await fetch(CONFIG.EXCHANGE_API);
-        const data = await res.json();
-        if (data && data.rates) {
-            exchangeRates = { KES: 1, USD: data.rates.USD, EUR: data.rates.EUR, GBP: data.rates.GBP };
-            localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), rates: exchangeRates }));
-        }
-    } catch (e) {
-        console.warn('Using default rates:', e);
-    }
-}
-
-function formatPrice(kesAmount, currency) {
-    const rate = exchangeRates[currency] || 1;
-    const converted = kesAmount * rate;
-    const symbols = { KES: 'KES ', USD: '$', EUR: '€', GBP: '£' };
-    if (currency === 'KES') return `KES ${kesAmount.toLocaleString()}`;
-    return `${symbols[currency]}${converted.toFixed(0)}`;
-}
-
-function applyCurrency(currency) {
-    document.querySelectorAll('.currency-toggle button').forEach(b => b.classList.toggle('active', b.dataset.currency === currency));
-    document.querySelectorAll('[data-price-kes]').forEach(el => {
-        const kes = parseFloat(el.dataset.priceKes);
-        el.textContent = formatPrice(kes, currency);
-    });
-    localStorage.setItem('sva-currency', currency);
-}
-
-document.querySelectorAll('.currency-toggle button').forEach(btn => {
-    btn.addEventListener('click', () => applyCurrency(btn.dataset.currency));
-});
 
 /* ============================================
    TRIP PLANNER QUIZ
@@ -1239,19 +1174,18 @@ function showQuizResult() {
     const result = recommendPackage();
     const main = packages[result.main];
     const alts = result.alternatives.map(k => packages[k]);
-    const cur = localStorage.getItem('sva-currency') || 'KES';
     document.getElementById('quizMatch').innerHTML = `
         <div class="label">Perfect Match</div>
         <h4>${main.name}</h4>
         <p>${main.duration} · ${main.tag}</p>
-        ${main.price ? `<div style="font-family:var(--font-heading);font-weight:700;color:var(--color-brown);font-size:1.2rem;">From ${formatPrice(main.price, cur)}</div>` : ''}
+        ${main.price ? `<div style="font-family:var(--font-heading);font-weight:700;color:var(--color-brown);font-size:1.2rem;">From KES ${main.price.toLocaleString()}</div>` : ''}
     `;
     document.getElementById('quizAlternatives').innerHTML = `
         <h5>You might also like:</h5>
         ${alts.map(a => `
             <div class="quiz-alt-item">
                 <div><strong>${a.name}</strong><br><small style="color:var(--color-text-light);">${a.duration} · ${a.tag}</small></div>
-                ${a.price ? `<span style="font-family:var(--font-heading);color:var(--color-green);font-weight:700;">From ${formatPrice(a.price, cur)}</span>` : ''}
+                ${a.price ? `<span style="font-family:var(--font-heading);color:var(--color-green);font-weight:700;">From KES ${a.price.toLocaleString()}</span>` : ''}
             </div>
         `).join('')}
     `;
@@ -1286,7 +1220,6 @@ for (let i = 0; i < 90; i++) {
 }
 
 const calendarInput = document.getElementById('calendar');
-let selectedDates = [];
 
 if (calendarInput) {
     flatpickr(calendarInput, {
@@ -1294,7 +1227,6 @@ if (calendarInput) {
         minDate: 'today',
         dateFormat: 'M j, Y',
         onChange: (selectedDatesArr, dateStr) => {
-            selectedDates = dateStr;
             document.getElementById('bk-dates').value = dateStr;
         },
         onDayCreate: (dObj, dStr, fp, dayElem) => {
@@ -1327,9 +1259,7 @@ function submitBooking(e) {
     const guests = document.getElementById('bk-guests').value;
     const dates = document.getElementById('bk-dates').value || 'Not specified';
     const notes = document.getElementById('bk-notes').value.trim() || 'None';
-    const currency = localStorage.getItem('sva-currency') || 'KES';
 
-    // Build a beautiful WhatsApp message
     const message =
         `🌟 *NEW BOOKING REQUEST* 🌟\n` +
         `━━━━━━━━━━━━━━━━━━━━\n\n` +
@@ -1338,8 +1268,7 @@ function submitBooking(e) {
         `📱 *Phone:* ${phone}\n` +
         `👥 *Guests:* ${guests}\n\n` +
         `🎯 *Package:* ${pkg}\n` +
-        `📅 *Travel Dates:* ${dates}\n` +
-        `💱 *Currency Preference:* ${currency}\n\n` +
+        `📅 *Travel Dates:* ${dates}\n\n` +
         `📝 *Special Requests:*\n${notes}\n\n` +
         `━━━━━━━━━━━━━━━━━━━━\n` +
         `✅ Sent from Savanna Voyage Africa website`;
@@ -1347,13 +1276,8 @@ function submitBooking(e) {
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${CONFIG.WHATSAPP_NUMBER}?text=${encodedMessage}`;
 
-    // Open WhatsApp
     window.open(whatsappUrl, '_blank');
-
-    // Show success modal
     document.getElementById('successModal').classList.add('active');
-
-    // Reset form
     document.getElementById('bookingForm').reset();
     document.getElementById('bk-dates').value = '';
 }
@@ -1420,7 +1344,6 @@ function renderGallery() {
                 </div>
             `;
             el.addEventListener('click', () => {
-                // Simple lightbox — open image in new tab as fallback
                 window.open(item.src, '_blank');
             });
         }
@@ -1469,13 +1392,10 @@ document.querySelectorAll('.prechat-quick button').forEach(btn => {
 /* ============================================
    INIT
    ============================================ */
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('year').textContent = new Date().getFullYear();
-    await loadExchangeRates();
-    applyCurrency(localStorage.getItem('sva-currency') || 'KES');
     renderGallery();
 
-    // Smooth scroll for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             const href = this.getAttribute('href');
